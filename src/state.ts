@@ -78,119 +78,120 @@ type Action =
   | NoteLoadingStatusAction
   | NoteSavingStatusAction
 
-  function reducer(state: State, action: Action): State {
-    switch (action.type) {
-      case 'auth':
-        return {
-          ...state,
-          nav: { type: 'default' },
-          auth: { status: action.status }
-        }
-      case 'auth success': {
-        const auth = {
-          status: 'done',
-          ceramic: action.ceramic,
-          idx: action.idx,
-        } as AuthenticatedState
-        return action.notes.length
-          ? {
-              ...state,
-              auth,
-              notes: action.notes.reduce((acc, item) => {
-                acc[item.id] = { status: 'init', title: item.title }
-                return acc
-              }, {} as Record<string, IndexLoadedNote>),
-            }
-          : {
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'auth':
+      return {
+        ...state,
+        nav: { type: 'default' },
+        auth: { status: action.status }
+      }
+    case 'auth success': {
+      const auth = {
+        status: 'done',
+        ceramic: action.ceramic,
+        idx: action.idx,
+      } as AuthenticatedState
+      return action.notes.length
+        ? {
+            ...state,
             auth,
-            draftStatus: 'unsaved',
-            nav: { type: 'draft' },
-            notes: {},
+            notes: action.notes.reduce((acc, item) => {
+              acc[item.id] = { status: 'init', title: item.title }
+              return acc
+            }, {} as Record<string, IndexLoadedNote>),
           }
-      }
-      case 'nav reset':
-        return { ...state, nav: { type: 'default' } }
-      case 'nav draft':
-        return {
-          ...state,
-          auth: state.auth as AuthenticatedState,
+        : {
+          auth,
+          draftStatus: 'unsaved',
           nav: { type: 'draft' },
+          notes: {},
         }
-      case 'draft status':
-        return {
-          ...state,
-          auth: state.auth as AuthenticatedState,
-          draftStatus: action.status,
-        }
-      case 'draft delete':
-        return {
-          ...state,
-          draftStatus: 'unsaved',
-          nav: { type: 'default' },
-        }
-      case 'draft saved': {
-        return {
-          auth: state.auth as AuthenticatedState,
-          draftStatus: 'unsaved',
-          nav: { type: 'note', docID: action.docID },
-          notes: {
-            ...state.notes,
-            [action.docID]: {
-              status: 'saved',
-              title: action.title,
-              doc: action.doc,
-            },
-          },
-        }
+    }
+    case 'nav reset':
+      return { ...state, nav: { type: 'default' } }
+    case 'nav draft':
+      return {
+        ...state,
+        auth: state.auth as AuthenticatedState,
+        nav: { type: 'draft' },
       }
-      case 'nav note':
-        return {
-          ...state,
-          auth: state.auth as AuthenticatedState,
-          nav: {
-            type: 'note',
-            docID: action.docID,
-          },
-        }
-      case 'note loaded': {
-        const id = (state.nav as NavNoteState).docID
-        const noteState = state.notes[id]
-        return {
-          ...state,
-          auth: state.auth as AuthenticatedState,
-          notes: {
-            ...state.notes,
-            [id]: {
-              status: 'loaded',
-              title: noteState.title,
-              doc: action.doc,
-            },
-          },
-        }
+    case 'draft status':
+      return {
+        ...state,
+        auth: state.auth as AuthenticatedState,
+        draftStatus: action.status,
       }
-      case 'note loading status': {
-        const id = (state.nav as NavNoteState).docID
-        const noteState = state.notes[id] as IndexLoadedNote
-        return {
-          ...state,
-          auth: state.auth as AuthenticatedState,
-          notes: {
-            ...state.notes,
-            [id]: { ...noteState, status: action.status },
-          },
-        }
+    case 'draft delete':
+      return {
+        ...state,
+        draftStatus: 'unsaved',
+        nav: { type: 'default' },
       }
-      case 'note saving status': {
-        const id = (state.nav as NavNoteState).docID
-        const noteState = state.notes[id] as StoredNote
-        return {
-          ...state,
-          auth: state.auth as AuthenticatedState,
-          notes: {
-            ...state.notes,
-            [id]: { ...noteState, status: action.status },
+    case 'draft saved': {
+      return {
+        auth: state.auth as AuthenticatedState,
+        draftStatus: 'unsaved',
+        nav: { type: 'note', docID: action.docID },
+        notes: {
+          ...state.notes,
+          [action.docID]: {
+            status: 'saved',
+            title: action.title,
+            doc: action.doc,
           },
-        }
+        },
+      }
+    }
+    case 'nav note':
+      return {
+        ...state,
+        auth: state.auth as AuthenticatedState,
+        nav: {
+          type: 'note',
+          docID: action.docID,
+        },
+      }
+    case 'note loaded': {
+      const id = (state.nav as NavNoteState).docID
+      const noteState = state.notes[id]
+      return {
+        ...state,
+        auth: state.auth as AuthenticatedState,
+        notes: {
+          ...state.notes,
+          [id]: {
+            status: 'loaded',
+            title: noteState.title,
+            doc: action.doc,
+          },
+        },
+      }
+    }
+    case 'note loading status': {
+      const id = (state.nav as NavNoteState).docID
+      const noteState = state.notes[id] as IndexLoadedNote
+      return {
+        ...state,
+        auth: state.auth as AuthenticatedState,
+        notes: {
+          ...state.notes,
+          [id]: { ...noteState, status: action.status },
+        },
+      }
+    }
+    case 'note saving status': {
+      const id = (state.nav as NavNoteState).docID
+      const noteState = state.notes[id] as StoredNote
+      return {
+        ...state,
+        auth: state.auth as AuthenticatedState,
+        notes: {
+          ...state.notes,
+          [id]: { ...noteState, status: action.status },
+        },
       }
     }
   }
+}
+
