@@ -9,7 +9,7 @@ import type { IDXInit, NotesList } from './idx'
 
 type AuthStatus = 'pending' | 'loading' | 'failed'
 export type DraftStatus = 'unsaved' | 'saving' | 'failed' | 'saved'
-type NoteLoadingStatus = 'init' | 'loading' | 'loading'
+type NoteLoadingStatus = 'init' | 'loading' | 'loading failed'
 type NoteSavingStatus = 'loaded' | 'saving' | 'saving failed' | 'saved'
 
 type UnauthenticatedState = { status: AuthStatus }
@@ -195,3 +195,93 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+export function useApp() {
+  const [state, dispatch] = useReducer(reducer, {
+    auth: { status: 'pending' },
+    draftStatus: 'unsaved',
+    nav: { type: 'default' },
+    notes: {},
+  })
+
+  const authenticate = useCallback((seed: Uint8Array) => {
+    dispatch({ type: 'auth', status: 'loading' })
+    getIDX(seed).then(
+      (init) => {
+        dispatch({ type: 'auth success', ...init })
+      },
+      (err) => {
+        console.warn('authentiate call failed', err)
+        dispatch({ type: 'auth', status: 'failed' })
+      },
+    )
+  }, [])
+
+  const openDraft = useCallback(() => {
+    dispatch({ type: 'nav draft' })
+  }, [])
+
+  const deleteDraft = useCallback(() => {
+    dispatch({ type: 'draft delete' })
+  }, [])
+
+  const saveDraft = useCallback((title: string, text: string) => {
+    const { ceramic, idx } = state.auth as AuthenticatedState
+    Promise.all([
+      ceramic.createDocument('title', {
+        content: { date: new Date().toISOString(), text },
+        metadata: { controllers: [idx.id], schema: schemas.Note },
+      }),
+      idx.get<NotesList>('notes'),
+    ]).then(([doc, notesList]) => {
+      const notes = notesList?.notes ?? []
+      return idx.set('notes', {
+        notes: [{ id: doc.id.toUrl(), title }, ...notes],
+      }).then(() => {
+        const docID = doc.id.toString()
+        dispatch({ type: 'draft saved', docID, title, doc })
+      })
+    }).catch((err) => {
+      console.log('failed to save draft', err)
+      dispatch({ type: 'draft status', status: 'failed' })
+    })
+  }, [state.auth])
+
+  const openNote = useCallback((docID: string) =>{
+    dispatch({ type: 'nav note', docID })
+
+    if (state.notes[docID] == null || state.notes[docID].status === 'init') {
+      const { ceramic } = state.auth as AuthenticatedState
+      ceramic.loadDocument(docID).then(
+        (doc) => {
+          dispatch({ type: 'note loaded', docID, doc })
+        },
+        () => {
+          dispatch({ type: 'note loading status', docID, status: 'loading failed' })
+        },
+      )
+    }
+  }, [state.auth, state.notes])
+
+  const saveNote = useCallback((doc: Doctype, text: string) => {
+    const docID = doc.id.toString()
+    dispatch({ type: 'note saving status', docID, status: 'saving' })
+    doc.change({ content: { date: new Date().toISOString(), text } }).then(
+      () => {
+        dispatch({ type: 'note saving status', docID, status: 'saved' })
+      },
+      () => {
+        dispatch({ type: 'note saving status', docID, status: 'saving failed' })
+      },
+    )
+  }, [])
+
+  return {
+    authenticate,
+    deleteDraft,
+    openDraft,
+    openNote,
+    saveDraft,
+    saveNote,
+    state,
+  }
+}
