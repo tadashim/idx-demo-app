@@ -1,9 +1,9 @@
 {
   "definitions": {
-    "notes": "kjzl6cwe1jw1493skyrr6l6v0ldj7z11018vf33h2egnt3k4qevsyqzf54qgwjh"
+    "notes": "kjzl6cwe1jw14bjl91sodjh58kqzmzab56uwq14kqsi61cu2rqlxot4o98onoa4"
   },
   "schemas": {
-    "Note": "ceramic://k3y52l7qbv1fry62z03errdwidpw4l4p1h1v0uuew2qz0ba9vwg90ck63rp072f40",
-    "NotesList": "ceramic://k3y52l7qbv1frxo6jqbaqcvbj3e2w4kf5yo0kuak9hwc4d8j47asm27az8ezn1m9s"
+    "Note": "ceramic://k3y52l7qbv1frxjvjbjofsd694sp70ozv5v5ws4en8f98y8g90bf1gklumj9ut4hs",
+    "NotesList": "ceramic://k3y52l7qbv1frxwnpx1b7j7rwx20zz2mtfny53swhgzab7xt2zjuq3ynq6veh34e8"
   }
 }

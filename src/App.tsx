@@ -130,8 +130,7 @@ function NotesList({
           <IconButton
             edge="end"
             aria-label="delete"
-            onClick={() => deleteDraft()}
-          >
+            onClick={() => deleteDraft()}>
             <DeleteIcon />
           </IconButton>
         </ListItemSecondaryAction>
@@ -139,7 +138,7 @@ function NotesList({
     )
   } else if (state.auth.status === 'done') {
     draft = (
-      <ListItem>
+      <ListItem button onClick={() => openDraft()}>
         <ListItemIcon>
           <NoteAddIcon />
         </ListItemIcon>
@@ -181,8 +180,7 @@ function NotesList({
         button
         key={docID}
         onClick={() => openNote(docID)}
-        selected={isSelected}
-      >
+        selected={isSelected}>
         <ListItemIcon>{icon}</ListItemIcon>
         <ListItemText primary={note.title} />
       </ListItem>
@@ -212,7 +210,8 @@ function AuthenticateScreen({ authenticate, state }: AuthenticateProps) {
   ) : (
     <>
       <Typography>
-        You need to authenticate to load your existing notes and create new ones.
+        You need to authenticate to load your existing notes and create new
+        ones.
       </Typography>
       <div>
         <TextField
@@ -231,15 +230,13 @@ function AuthenticateScreen({ authenticate, state }: AuthenticateProps) {
         color="primary"
         disabled={seed === '' || isLoading}
         onClick={() => authenticate(fromString(seed, 'base16'))}
-        variant="contained"
-      >
+        variant="contained">
         Authenticate
       </Button>
       <Button
         color="primary"
         disabled={isLoading}
-        onClick={() => setSeed(toString(randomBytes(32), 'base16'))}
-      >
+        onClick={() => setSeed(toString(randomBytes(32), 'base16'))}>
         Generate random seed
       </Button>
     </>
@@ -279,8 +276,7 @@ function DraftScreen({ save, status }: DraftScreenProps) {
       <Dialog
         open={open}
         onClose={handleClose}
-        aria-labelledby="form-dialog-title"
-      >
+        aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Save note</DialogTitle>
         <DialogContent>
           <TextField
@@ -305,6 +301,7 @@ function DraftScreen({ save, status }: DraftScreenProps) {
       <Paper elevation={5}>
         <TextareaAutosize
           className={classes.noteTextarea}
+          disabled={status === 'saving'}
           placeholder="Note contents..."
           ref={textRef}
           rowsMin={10}
@@ -316,8 +313,7 @@ function DraftScreen({ save, status }: DraftScreenProps) {
         color="primary"
         disabled={status === 'saving'}
         onClick={handleOpen}
-        variant="contained"
-      >
+        variant="contained">
         Save
       </Button>
     </>
@@ -347,6 +343,7 @@ function NoteScreen({ note, save }: NoteScreenProps) {
       <Paper elevation={5}>
         <TextareaAutosize
           className={classes.noteTextarea}
+          disabled={note.status === 'saving'}
           defaultValue={doc.content.text}
           placeholder="Note contents..."
           ref={textRef}
@@ -359,8 +356,7 @@ function NoteScreen({ note, save }: NoteScreenProps) {
         color="primary"
         disabled={note.status === 'saving'}
         onClick={() => save(doc, textRef.current?.value ?? '')}
-        variant="contained"
-      >
+        variant="contained">
         Save
       </Button>
     </>
@@ -424,14 +420,13 @@ export default function App() {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            className={classes.menuButton}
-          >
+            className={classes.menuButton}>
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} noWrap variant="h6">
             IDX demo notes app
           </Typography>
-          <Button color="inherit" href="<https://idx.xyz>" variant="outlined">
+          <Button color="inherit" href="https://idx.xyz" variant="outlined">
             IDX
           </Button>
         </Toolbar>
@@ -444,8 +439,7 @@ export default function App() {
             open={mobileOpen}
             onClose={handleDrawerToggle}
             classes={{ paper: classes.drawerPaper }}
-            ModalProps={{ keepMounted: true }}
-          >
+            ModalProps={{ keepMounted: true }}>
             {drawer}
           </Drawer>
         </Hidden>
@@ -453,8 +447,7 @@ export default function App() {
           <Drawer
             classes={{ paper: classes.drawerPaper }}
             variant="permanent"
-            open
-          >
+            open>
             {drawer}
           </Drawer>
         </Hidden>
